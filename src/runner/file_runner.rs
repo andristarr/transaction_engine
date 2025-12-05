@@ -39,7 +39,7 @@ impl FileRunner {
     fn print_accounts(&self, engine: &Engine) -> Result<()> {
         let accounts = engine.get_accounts();
         let mut sorted_accounts: Vec<_> = accounts.values().collect();
-        sorted_accounts.sort_by_key(|a| a.client);
+        sorted_accounts.sort_by_key(|a| a.client());
 
         let mut wtr = Writer::from_writer(std::io::stdout());
 
@@ -47,11 +47,11 @@ impl FileRunner {
 
         for account in sorted_accounts {
             wtr.write_record(&[
-                account.client.to_string(),
-                format!("{:.4}", account.available),
-                format!("{:.4}", account.withheld),
-                format!("{:.4}", account.total),
-                account.locked.to_string(),
+                account.client().to_string(),
+                format!("{:.4}", account.available()),
+                format!("{:.4}", account.withheld()),
+                format!("{:.4}", account.total()),
+                account.locked().to_string(),
             ])?;
         }
 

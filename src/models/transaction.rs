@@ -1,7 +1,4 @@
-use anyhow::Result;
 use rust_decimal::Decimal;
-
-use crate::models::account::Account;
 
 #[derive(Clone, Debug)]
 pub struct Transaction {
@@ -46,27 +43,5 @@ impl Transaction {
             TransactionType::Withdrawal { amount } => *amount,
             _ => Decimal::ZERO,
         }
-    }
-
-    pub fn run(&self, account: &mut Account) -> Result<()> {
-        match self.transaction_type {
-            TransactionType::Deposit { amount } => {
-                account.deposit(amount)?;
-            }
-            TransactionType::Withdrawal { amount } => {
-                account.withdraw(amount)?;
-            }
-            TransactionType::Dispute => {
-                account.dispute(self)?;
-            }
-            TransactionType::Resolve => {
-                account.resolve(self)?;
-            }
-            TransactionType::Chargeback => {
-                account.chargeback(self)?;
-            }
-        }
-
-        Ok(())
     }
 }
