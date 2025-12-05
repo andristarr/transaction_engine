@@ -134,3 +134,76 @@ impl Account {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use rust_decimal::dec;
+
+    use super::*;
+
+    #[test]
+    fn deposit_locked_account_fails() {
+        let mut account = Account::new(1);
+        account.locked = true;
+
+        let result = account.deposit(dec!(10.0));
+
+        assert!(result.is_err());
+        assert!(account.available == Decimal::ZERO);
+    }
+
+    #[test]
+    fn deposit_negative_amount_fails() {
+        let mut account = Account::new(1);
+        account.deposit(dec!(100.0)).unwrap();
+
+        let result = account.deposit(dec!(-0.001));
+
+        assert!(result.is_err());
+        assert!(account.available == dec!(100.0));
+    }
+
+    #[test]
+    fn deposit_increases_available_and_total() {
+        let mut account = Account::new(1);
+
+        account.deposit(dec!(100.01)).unwrap();
+
+        assert_eq!(account.available, dec!(100.01));
+        assert_eq!(account.total, dec!(100.01));
+    }
+
+    #[test]
+    fn withdraw_locked_account_fails() {
+        let mut account = Account::new(1);
+        account.deposit(dec!(100.0)).unwrap();
+        account.locked = true;
+
+        let result = account.withdraw(dec!(10.0));
+
+        assert!(result.is_err());
+        assert!(account.available == dec!(100.0));
+    }
+
+    #[test]
+    fn withdraw_negative_amount_fails() {
+        let mut account = Account::new(1);
+        account.deposit(dec!(100.0)).unwrap();
+
+        let result = account.withdraw(dec!(-0.001));
+
+        assert!(result.is_err());
+        assert!(account.available == dec!(100.0));
+    }
+
+    #[test]
+    fn withdraw_decreases_available_and_total() {
+        let mut account = Account::new(1);
+        account.deposit(dec!(100.01)).unwrap();
+
+        account.withdraw(dec!(50.00)).unwrap();
+
+        assert_eq!(account.available, dec!(50.01));
+        assert_eq!(account.total, dec!(50.01));
+    }
+}
